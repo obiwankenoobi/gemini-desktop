@@ -2,7 +2,7 @@
 
 A beautiful, lightweight desktop app that provides quick access to Google Gemini AI from your system tray.
 
-![Gemini Desktop App](./screenshots/app-interface.png)
+![Gemini Desktop Demo](./screenshots/screenrecord_0.gif)
 
 ## ✨ Features
 
