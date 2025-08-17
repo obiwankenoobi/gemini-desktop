@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Desktop</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: white;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 40px;
+        }
+        
+        .logo {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #96ceb4);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .title {
+            font-size: 32px;
+            margin-bottom: 20px;
+            font-weight: 300;
+        }
+        
+        .subtitle {
+            font-size: 18px;
+            margin-bottom: 40px;
+            opacity: 0.9;
+        }
+        
+        .button {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px;
+        }
+        
+        .button:hover {
+            background: rgba(255, 255, 255, 0.3);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .info {
+            margin-top: 40px;
+            font-size: 14px;
+            opacity: 0.8;
+            line-height: 1.6;
+        }
+        
+        .feature {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+        
+        .feature-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">G</div>
+        <div class="title">Gemini Desktop</div>
+        <div class="subtitle">Quick access to Google Gemini AI</div>
+        
+        <a href="https://gemini.google.com/app" class="button" onclick="openGemini()">Open Gemini</a>
+        <a href="https://gemini.google.com/app" class="button" target="_blank">Open in Browser</a>
+        
+        <div class="feature">
+            <div class="feature-title">🚀 Quick Access</div>
+            Click the tray icon to show/hide this window instantly
+        </div>
+        
+        <div class="feature">
+            <div class="feature-title">💡 Always Available</div>
+            Stays in your system tray for immediate access to AI assistance
+        </div>
+        
+        <div class="feature">
+            <div class="feature-title">🔒 Secure</div>
+            Opens Gemini directly in your default browser for full security
+        </div>
+        
+        <div class="info">
+            This desktop app provides quick access to Google Gemini.<br>
+            Due to security restrictions, Gemini opens in your browser.<br>
+            Keep this window open for instant access via the system tray.
+        </div>
+    </div>
+
+    <script>
+        function openGemini() {
+            // Use Tauri's shell API to open in browser
+            if (window.__TAURI__) {
+                window.__TAURI__.shell.open('https://gemini.google.com/app');
+            } else {
+                // Fallback for development
+                window.open('https://gemini.google.com/app', '_blank');
+            }
+        }
+        
+        console.log('Gemini Desktop app loaded');
+    </script>
+</body>
+</html>
