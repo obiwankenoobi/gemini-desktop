@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gemini Desktop - Quick Access to AI from Your Toolbar</title>
+    <meta name="description" content="Beautiful desktop app for instant access to Google Gemini AI from your system tray. Free, secure, and lightweight.">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><circle cx='16' cy='16' r='14' fill='%234285f4'/><text x='16' y='21' text-anchor='middle' fill='white' font-size='16' font-family='Arial, sans-serif' font-weight='bold'>G</text></svg>">
+    <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Google Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            line-height: 1.6;
+            color: #1f1f1f;
+            overflow-x: hidden;
+            background: #fef7ed;
+        }
+
+        /* Floating Shapes Background */
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .shape:nth-child(odd) {
+            animation-direction: reverse;
+        }
+
+        .shape-1 { width: 80px; height: 80px; background: #4285f4; top: 10%; left: 5%; animation-delay: 0s; }
+        .shape-2 { width: 60px; height: 60px; background: #34a853; top: 15%; right: 8%; animation-delay: 1s; }
+        .shape-3 { width: 100px; height: 100px; background: #fbbc04; top: 25%; left: 75%; animation-delay: 2s; }
+        .shape-4 { width: 40px; height: 40px; background: #ea4335; top: 40%; left: 15%; animation-delay: 3s; }
+        .shape-5 { width: 120px; height: 120px; background: #ff6d01; top: 60%; right: 20%; animation-delay: 1.5s; }
+        .shape-6 { width: 70px; height: 70px; background: #9c27b0; bottom: 20%; left: 10%; animation-delay: 2.5s; }
+        .shape-7 { width: 90px; height: 90px; background: #00bcd4; bottom: 30%; right: 15%; animation-delay: 0.5s; }
+
+        /* Diamond shapes */
+        .diamond {
+            width: 50px;
+            height: 50px;
+            background: #ff4081;
+            transform: rotate(45deg);
+            border-radius: 10px;
+        }
+
+        .diamond-1 { top: 30%; left: 20%; animation-delay: 4s; }
+        .diamond-2 { top: 70%; right: 30%; animation-delay: 1s; }
+
+        /* Stars */
+        .star {
+            width: 0;
+            height: 0;
+            position: relative;
+            display: inline-block;
+        }
+
+        .star:before {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: -18px;
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 18px solid #4caf50;
+            transform: rotate(35deg);
+        }
+
+        .star:after {
+            content: '';
+            position: absolute;
+            left: -25px;
+            top: -18px;
+            width: 0;
+            height: 0;
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-bottom: 18px solid #4caf50;
+            transform: rotate(-35deg);
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            background: #fef7ed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #1f1f1f;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            padding: 0 20px;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 120px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: #4285f4;
+            text-shadow: none;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            color: #4285f4;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .hero .tagline {
+            font-size: 2rem;
+            font-weight: 400;
+            margin-bottom: 40px;
+            color: #1f1f1f;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-bottom: 60px;
+        }
+
+        .btn {
+            padding: 18px 35px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 24px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+            box-shadow: 0 2px 8px rgba(66, 133, 244, 0.3);
+        }
+
+        .btn-primary:hover {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.4);
+        }
+
+        .btn-secondary {
+            background: white;
+            color: #4285f4;
+            border: 2px solid #4285f4;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: #f8f9fa;
+            transform: translateY(-2px);
+        }
+
+        .hero-features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 60px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 30px 25px;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e8eaed;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-card h3 {
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #1f1f1f;
+            font-weight: 600;
+        }
+
+        .feature-card p {
+            color: #5f6368;
+            font-weight: 400;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 100px 20px;
+            background: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-header h2 {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            color: #4285f4;
+            font-weight: 700;
+            font-family: 'Google Sans', sans-serif;
+        }
+
+        .section-header p {
+            font-size: 1.3rem;
+            color: #5f6368;
+            max-width: 600px;
+            margin: 0 auto;
+            font-weight: 400;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 40px;
+        }
+
+        .feature {
+            background: white;
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e8eaed;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .feature:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
+        }
+
+        .feature-icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: #1f1f1f;
+            font-weight: 600;
+        }
+
+        .feature p {
+            color: #5f6368;
+            line-height: 1.6;
+            font-weight: 400;
+        }
+
+        /* What can Gemini do section */
+        .capabilities {
+            padding: 100px 20px;
+            background: #fef7ed;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .capabilities h2 {
+            font-size: 3rem;
+            text-align: center;
+            margin-bottom: 60px;
+            color: #1f1f1f;
+            font-weight: 700;
+        }
+
+        .capabilities-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .capability-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin: 0 auto 15px;
+            position: relative;
+        }
+
+        .capability-icon.write { background: #ff6d01; }
+        .capability-icon.chat { background: #ea4335; }
+        .capability-icon.science { background: #4285f4; }
+        .capability-icon.translate { background: #ea4335; }
+        .capability-icon.code { background: #34a853; }
+
+        .capability-text {
+            text-align: center;
+            font-weight: 500;
+            color: #1f1f1f;
+        }
+
+        /* Download Section */
+        .download {
+            padding: 100px 20px;
+            background: #4285f4;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .download h2 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+
+        .download p {
+            font-size: 1.3rem;
+            margin-bottom: 40px;
+            opacity: 0.9;
+            font-weight: 400;
+        }
+
+        .download-btn {
+            background: white;
+            color: #4285f4;
+            padding: 20px 40px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-block;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Footer */
+        .footer {
+            padding: 60px 20px;
+            background: #1f1f1f;
+            color: white;
+            text-align: center;
+        }
+
+        .footer-content {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: #e8eaed;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            font-weight: 400;
+        }
+
+        .footer-links a:hover {
+            color: #4285f4;
+        }
+
+        /* Testimonial */
+        .testimonial {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            margin: 40px auto;
+            max-width: 400px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: rotate(-2deg);
+            border-left: 4px solid #fbbc04;
+        }
+
+        .testimonial-text {
+            font-size: 1.2rem;
+            font-style: italic;
+            color: #1f1f1f;
+            margin-bottom: 15px;
+            font-weight: 400;
+        }
+
+        .testimonial-author {
+            color: #5f6368;
+            font-weight: 500;
+        }
+
+        /* Character */
+        .character {
+            position: absolute;
+            right: 10%;
+            bottom: 10%;
+            width: 150px;
+            height: 150px;
+            background: #4285f4;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            z-index: 5;
+        }
+
+        .character::before {
+            content: '👋';
+            position: absolute;
+            top: 30%;
+            left: 30%;
+            font-size: 3rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero .tagline {
+                font-size: 1.5rem;
+            }
+
+            .logo {
+                font-size: 80px;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-features {
+                grid-template-columns: 1fr;
+            }
+
+            .section-header h2 {
+                font-size: 2rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .capabilities-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            }
+
+            .character {
+                display: none;
+            }
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.8s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <!-- Floating Shapes Background -->
+        <div class="floating-shapes">
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+            <div class="shape shape-4"></div>
+            <div class="shape shape-5"></div>
+            <div class="shape shape-6"></div>
+            <div class="shape shape-7"></div>
+            <div class="shape diamond diamond-1"></div>
+            <div class="shape diamond diamond-2"></div>
+        </div>
+
+        <div class="hero-content fade-in-up">
+            <div class="logo">G</div>
+            <h1>Gemini gets it.</h1>
+            <p class="tagline">Talk to your desktop like it's magic</p>
+            
+            <div class="cta-buttons">
+                <a href="https://github.com/obiwankenoobi/gemini-desktop/releases/latest" class="btn btn-primary">
+                    📥 Download the app
+                </a>
+                <a href="https://github.com/obiwankenoobi/gemini-desktop" class="btn btn-secondary" target="_blank">
+                    📚 View on GitHub
+                </a>
+            </div>
+
+            <div class="hero-features">
+                <div class="feature-card">
+                    <h3>🚀 Quick Access</h3>
+                    <p>One-click access from your system tray</p>
+                </div>
+                <div class="feature-card">
+                    <h3>🔒 Secure</h3>
+                    <p>Opens Gemini safely in your browser</p>
+                </div>
+                <div class="feature-card">
+                    <h3>⚡ Lightweight</h3>
+                    <p>Minimal resource usage, maximum efficiency</p>
+                </div>
+            </div>
+
+            <div class="testimonial">
+                <div class="testimonial-text">"I love how easy it is to use!"</div>
+                <div class="testimonial-author">- Desktop User</div>
+            </div>
+        </div>
+
+        <div class="character"></div>
+    </section>
+
+    <!-- What can Gemini do Section -->
+    <section class="capabilities">
+        <div class="container">
+            <h2>What can Gemini do?</h2>
+            
+            <div class="capabilities-grid">
+                <div>
+                    <div class="capability-icon write">✏️</div>
+                    <div class="capability-text">Write & Edit</div>
+                </div>
+                <div>
+                    <div class="capability-icon chat">💬</div>
+                    <div class="capability-text">Chat & Discuss</div>
+                </div>
+                <div>
+                    <div class="capability-icon science">⚛️</div>
+                    <div class="capability-text">Science & Math</div>
+                </div>
+                <div>
+                    <div class="capability-icon translate">Aあ</div>
+                    <div class="capability-text">Translate</div>
+                </div>
+                <div>
+                    <div class="capability-icon code">💻</div>
+                    <div class="capability-text">Code & Debug</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <div class="container">
+            <div class="section-header">
+                <h2>Powerful Features</h2>
+                <p>Everything you need for seamless AI assistance right from your desktop</p>
+            </div>
+
+            <div class="features-grid">
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h3>System Tray Integration</h3>
+                    <p>Always accessible from your menu bar with a beautiful blue "G" icon. Click to show or hide the launcher window instantly.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🌐</div>
+                    <h3>Browser-Based Security</h3>
+                    <p>Launches Gemini in your default browser for maximum security and full feature access. No data stored locally.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">🎨</div>
+                    <h3>Beautiful Interface</h3>
+                    <p>Modern Google-inspired design with smooth animations and intuitive controls. A pleasure to use every day.</p>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">⚙️</div>
+                    <h3>Native Performance</h3>
+                    <p>Built with Tauri and Rust for fast startup times and minimal memory usage. Feels like a native macOS app.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download">
+        <div class="container">
+            <h2>Download the app</h2>
+            <p>Start enjoying instant AI access from your desktop today</p>
+            <a href="https://github.com/obiwankenoobi/gemini-desktop/releases/latest" class="download-btn">
+                Download for macOS
+            </a>
+            <div style="margin-top: 40px; opacity: 0.8;">
+                <p><strong>System Requirements:</strong> macOS 10.13+ • ~10MB storage • Minimal RAM usage</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-links">
+                <a href="https://github.com/obiwankenoobi/gemini-desktop" target="_blank">GitHub</a>
+                <a href="https://github.com/obiwankenoobi/gemini-desktop/issues" target="_blank">Support</a>
+                <a href="https://github.com/obiwankenoobi/gemini-desktop/releases" target="_blank">Releases</a>
+                <a href="https://gemini.google.com/app" target="_blank">Google Gemini</a>
+            </div>
+            <p>&copy; 2025 Gemini Desktop. Open source under MIT License.</p>
+            <p>Made with ❤️ for the AI community • Built with Tauri & Rust</p>
+        </div>
+    </footer>
+
+    <script>
+        // Add fade-in animation to elements as they come into view
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in-up');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all feature cards and sections
+        document.querySelectorAll('.feature, .feature-card').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Enhanced floating animation for shapes
+        document.querySelectorAll('.shape').forEach((shape, index) => {
+            const delay = Math.random() * 2;
+            const duration = 4 + Math.random() * 4;
+            shape.style.animationDelay = `${delay}s`;
+            shape.style.animationDuration = `${duration}s`;
+        });
+
+        console.log('🤖 Gemini Desktop Landing Page Loaded - Google Style!');
+    </script>
+</body>
+</html>
